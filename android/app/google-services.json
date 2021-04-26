@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "167050447048",
+    "project_id": "laundry-box-iot",
+    "storage_bucket": "laundry-box-iot.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:167050447048:android:49c904e43dd002f2c53dfd",
+        "android_client_info": {
+          "package_name": "com.example.laundry_box_courier"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "167050447048-4uk0lh0gip9o5135tjsr8i6t0dek4bhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm0qxt9Nyw_g92VoarBr8opQXTFhnfG8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "167050447048-4uk0lh0gip9o5135tjsr8i6t0dek4bhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
