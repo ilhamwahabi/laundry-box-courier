@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -126,7 +127,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       SizedBox(height: 7.5),
                       Text(dateFormat.format(
                           new DateTime.fromMillisecondsSinceEpoch(
-                              document.data()['created_at'])))
+                              document.data()['created_at']))),
+                      SizedBox(height: 7.5),
+                      ElevatedButton(
+                        onPressed: () async {
+                          String _url =
+                              "https://www.google.com/maps/search/?api=1&query=${document.data()['geo']['lat']},${document.data()['geo']['lng']}";
+                          await canLaunch(_url)
+                              ? await launch(_url)
+                              : throw 'Could not launch $_url';
+                        },
+                        child: Text('Lihat Lokasi Pelanggan'),
+                      ),
                     ],
                   ),
                 );
