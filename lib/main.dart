@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Laundry Box Courier'),
     );
   }
 }
@@ -69,6 +69,19 @@ class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
+
+List<String> laundryType = [
+  "Reguler 3 Hari ",
+  "Reguler 2 Hari ",
+  "Express 1 Hari ",
+  "Express 12 Jam ",
+  "Express 4 Jam"
+];
+List<String> laundryPackage = [
+  "Cuci + Kering + Lipat",
+  "Cuci + Kering + Setrika + Lipat",
+  "Setrika + Lipat"
+];
 
 class _MyHomePageState extends State<MyHomePage> {
   CollectionReference users =
@@ -93,12 +106,22 @@ class _MyHomePageState extends State<MyHomePage> {
               return Text("Loading");
             }
 
-            return new ListView(
+            return ListView(
               children: snapshot.data.docs.map((DocumentSnapshot document) {
-                return new ListTile(
-                  title: new Text(document.data()['laundry_type'].toString()),
-                  subtitle:
-                      new Text(document.data()['laundry_package'].toString()),
+                return ListTile(
+                  title: Container(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Text(laundryType[document.data()['laundry_type']]),
+                  ),
+                  subtitle: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${laundryPackage[document.data()['laundry_package']]} (${document.data()['weight']} kg)",
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             );
