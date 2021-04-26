@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
             return ListView(
               children: snapshot.data.docs.map((DocumentSnapshot document) {
+                final dateFormat = new DateFormat('dd MMMM yyyy hh:mm');
+
                 return ListTile(
                   title: Container(
                     padding: EdgeInsets.symmetric(vertical: 10),
@@ -120,6 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       Text(
                         "${laundryPackage[document.data()['laundry_package']]} (${document.data()['weight']} kg)",
                       ),
+                      SizedBox(height: 7.5),
+                      Text(dateFormat.format(
+                          new DateTime.fromMillisecondsSinceEpoch(
+                              document.data()['created_at'])))
                     ],
                   ),
                 );
