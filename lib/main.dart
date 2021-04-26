@@ -125,19 +125,35 @@ class _MyHomePageState extends State<MyHomePage> {
                         "${laundryPackage[document.data()['laundry_package']]} (${document.data()['weight']} kg)",
                       ),
                       SizedBox(height: 7.5),
-                      Text(dateFormat.format(
-                          new DateTime.fromMillisecondsSinceEpoch(
-                              document.data()['created_at']))),
+                      Text(
+                        dateFormat.format(
+                            new DateTime.fromMillisecondsSinceEpoch(
+                                document.data()['created_at'])),
+                      ),
                       SizedBox(height: 7.5),
-                      ElevatedButton(
-                        onPressed: () async {
+                      GestureDetector(
+                        onTap: () async {
                           String _url =
                               "https://www.google.com/maps/search/?api=1&query=${document.data()['geo']['lat']},${document.data()['geo']['lng']}";
                           await canLaunch(_url)
                               ? await launch(_url)
                               : throw 'Could not launch $_url';
                         },
-                        child: Text('Lihat Lokasi Pelanggan'),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Text(
+                            'Lihat Lokasi Pelanggan',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 7.5),
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Text('Konfirmasi Penjemputan'),
                       ),
                     ],
                   ),
