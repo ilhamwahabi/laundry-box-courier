@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Laundry Box Courier'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -152,8 +154,25 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       SizedBox(height: 7.5),
                       ElevatedButton(
-                        onPressed: () {},
-                        child: Text('Konfirmasi Penjemputan'),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              document.data()['status'] == 'received'
+                                  ? Colors.blue
+                                  : Colors.green),
+                        ),
+                        onPressed: () async {
+                          await HttpClient().postUrl(Uri.parse(
+                              "https://laundry-box-iot.herokuapp.com/confirm"));
+
+                          await users
+                              .doc(document.id)
+                              .update({"status": "confirmed"});
+                        },
+                        child: Text(
+                          document.data()['status'] == 'received'
+                              ? 'Konfirmasi Penjemputan'
+                              : 'Dikonfirmasi',
+                        ),
                       ),
                     ],
                   ),
