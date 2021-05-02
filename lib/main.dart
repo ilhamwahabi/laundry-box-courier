@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
+import 'package:http/http.dart' as http;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,7 +88,7 @@ List<String> laundryPackage = [
 ];
 
 class _MyHomePageState extends State<MyHomePage> {
-  CollectionReference users =
+  CollectionReference laundries =
       FirebaseFirestore.instance.collection('laundries');
 
   @override
@@ -97,90 +97,92 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: users.snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Something went wrong');
-            }
+      body: StreamBuilder<QuerySnapshot>(
+        stream: laundries.snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
 
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text("Loading");
-            }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text("Loading");
+          }
 
-            return ListView(
-              children: snapshot.data.docs.map((DocumentSnapshot document) {
-                final dateFormat = new DateFormat('dd MMMM yyyy hh:mm');
+          return ListView(
+            children: snapshot.data.docs.map((DocumentSnapshot document) {
+              final dateFormat = new DateFormat('dd MMMM yyyy hh:mm');
 
-                return ListTile(
-                  title: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Text(laundryType[document.data()['laundry_type']]),
-                  ),
-                  subtitle: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${laundryPackage[document.data()['laundry_package']]} (${document.data()['weight']} kg)",
-                      ),
-                      SizedBox(height: 7.5),
-                      Text(
-                        dateFormat.format(
-                            new DateTime.fromMillisecondsSinceEpoch(
-                                document.data()['created_at'])),
-                      ),
-                      SizedBox(height: 7.5),
-                      GestureDetector(
-                        onTap: () async {
-                          String _url =
-                              "https://www.google.com/maps/search/?api=1&query=${document.data()['geo']['lat']},${document.data()['geo']['lng']}";
-                          await canLaunch(_url)
-                              ? await launch(_url)
-                              : throw 'Could not launch $_url';
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Text(
-                            'Lihat Lokasi Pelanggan',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                            ),
+              return ListTile(
+                title: Container(
+                  padding: EdgeInsets.only(top: 20, bottom: 10),
+                  child: Text(laundryType[document.data()['laundry_type']]),
+                ),
+                subtitle: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${laundryPackage[document.data()['laundry_package']]} (${document.data()['weight']} kg)",
+                    ),
+                    SizedBox(height: 7.5),
+                    Text(
+                      dateFormat.format(new DateTime.fromMillisecondsSinceEpoch(
+                          document.data()['timestamp'])),
+                    ),
+                    SizedBox(height: 7.5),
+                    GestureDetector(
+                      onTap: () async {
+                        String _url =
+                            "https://www.google.com/maps/search/?api=1&query=${document.data()['geo']['lat']},${document.data()['geo']['lng']}";
+                        await canLaunch(_url)
+                            ? await launch(_url)
+                            : throw 'Could not launch $_url';
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text(
+                          'Lihat Lokasi Pelanggan',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      SizedBox(height: 7.5),
-                      ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              document.data()['status'] == 'received'
-                                  ? Colors.blue
-                                  : Colors.green),
-                        ),
-                        onPressed: () async {
-                          await HttpClient().postUrl(Uri.parse(
-                              "https://laundry-box-iot.herokuapp.com/confirm"));
+                    ),
+                    SizedBox(height: 7.5),
+                    ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            document.data()['status'] == 'received'
+                                ? Colors.blue
+                                : Colors.green),
+                      ),
+                      onPressed: () async {
+                        if (document.data()['status'] == 'received') {
+                          await http.post(
+                              'https://laundry-box-iot.herokuapp.com/confirm');
 
-                          await users
+                          await laundries
                               .doc(document.id)
                               .update({"status": "confirmed"});
-                        },
-                        child: Text(
-                          document.data()['status'] == 'received'
-                              ? 'Konfirmasi Penjemputan'
-                              : 'Dikonfirmasi',
-                        ),
+                        } else {
+                          await laundries
+                              .doc(document.id)
+                              .update({"status": "received"});
+                        }
+                      },
+                      child: Text(
+                        document.data()['status'] == 'received'
+                            ? 'Konfirmasi Penjemputan'
+                            : 'Dikonfirmasi',
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          );
+        },
       ),
     );
   }
